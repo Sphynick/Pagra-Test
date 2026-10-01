@@ -414,6 +414,13 @@ export default function App() {
     [activeItems]
   );
 
+
+  // Smooth-scroll to a section without adding "#section" to the address bar
+  const goTo = (id: string) => {
+    setCurrentView('storefront');
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
   return (
     <div
       data-theme={theme}
@@ -441,10 +448,11 @@ export default function App() {
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[var(--mute)]">
             <a
               href="#browse"
-              onClick={() => {
-                setCurrentView('storefront');
+              onClick={(e) => {
+                e.preventDefault();
                 setSelectedCategory('ALL');
                 setOnlyOnSale(false);
+                goTo('browse');
               }}
               className="hover:text-[var(--ink)] transition-colors whitespace-nowrap"
             >
@@ -452,10 +460,11 @@ export default function App() {
             </a>
             <a
               href="#browse"
-              onClick={() => {
-                setCurrentView('storefront');
+              onClick={(e) => {
+                e.preventDefault();
                 setSelectedCategory('ALL');
                 setOnlyOnSale(true);
+                goTo('browse');
               }}
               className="hover:text-[var(--ink)] transition-colors whitespace-nowrap"
             >
@@ -463,14 +472,20 @@ export default function App() {
             </a>
             <a
               href="#reviews"
-              onClick={() => setCurrentView('storefront')}
+              onClick={(e) => {
+                e.preventDefault();
+                goTo('reviews');
+              }}
               className="hover:text-[var(--ink)] transition-colors whitespace-nowrap"
             >
               Reviews
             </a>
             <a
               href="#location"
-              onClick={() => setCurrentView('storefront')}
+              onClick={(e) => {
+                e.preventDefault();
+                goTo('location');
+              }}
               className="hover:text-[var(--ink)] transition-colors whitespace-nowrap"
             >
               Location
@@ -577,9 +592,11 @@ export default function App() {
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <a
                     href="#browse"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       setSelectedCategory('ALL');
                       setOnlyOnSale(false);
+                      goTo('browse');
                     }}
                     className="min-h-[48px] inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-[var(--on-accent)] bg-[var(--accent)] hover:opacity-95 rounded-lg transition-opacity whitespace-nowrap"
                   >
