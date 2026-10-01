@@ -1,0 +1,307 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrapAdmin() {
+      return isVerifiedUser() && request.auth.token.email == 'nicholasnjau22@gmail.com';
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        isBootstrapAdmin() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // 3. Entity Validation Blueprints (Synchronized verbatim with firebase-blueprint.json)
+    function isValidFurnitureItem(data) {
+      return data.keys().hasAll([
+          'name',
+          'description',
+          'price',
+          'category',
+          'imageUrl',
+          'dimensions',
+          'material',
+          'isOnSale',
+          'salePrice',
+          'saleLabel',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'description',
+          'price',
+          'category',
+          'imageUrl',
+          'dimensions',
+          'material',
+          'isOnSale',
+          'salePrice',
+          'saleLabel',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 120
+        && data.description is string && data.description.size() >= 10 && data.description.size() <= 2000
+        && data.price is number && data.price > 0 && data.price <= 100000000
+        && data.category is string && data.category.size() >= 2 && data.category.size() <= 80
+        && data.imageUrl is string && data.imageUrl.size() >= 5 && data.imageUrl.size() <= 600000
+        && data.dimensions is string && data.dimensions.size() >= 2 && data.dimensions.size() <= 120
+        && data.material is string && data.material.size() >= 2 && data.material.size() <= 120
+        && data.isOnSale is bool
+        && data.salePrice is number && data.salePrice >= 0 && data.salePrice <= 100000000
+        && data.saleLabel is string && data.saleLabel.size() >= 0 && data.saleLabel.size() <= 60
+        && data.createdBy is string && data.createdBy.size() >= 1 && data.createdBy.size() <= 128
+        && data.createdBy.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll([
+          'name',
+          'slug',
+          'description',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'slug',
+          'description',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 80
+        && data.slug is string && data.slug.size() >= 2 && data.slug.size() <= 80
+        && data.slug.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.description is string && data.description.size() >= 2 && data.description.size() <= 300
+        && data.createdBy is string && data.createdBy.size() >= 1 && data.createdBy.size() <= 128
+        && data.createdBy.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdminGrant(data) {
+      return data.keys().hasAll([
+          'uid',
+          'email',
+          'role',
+          'addedBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'email',
+          'role',
+          'addedBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128
+        && data.uid.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 254
+        && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && data.role is string && data.role.size() == 5 && data.role == 'admin'
+        && data.addedBy is string && data.addedBy.size() >= 1 && data.addedBy.size() <= 128
+        && data.addedBy.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCustomerReview(data) {
+      return data.keys().hasAll([
+          'authorName',
+          'authorLocation',
+          'itemName',
+          'rating',
+          'comment',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'authorName',
+          'authorLocation',
+          'itemName',
+          'rating',
+          'comment',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.authorName is string && data.authorName.size() >= 2 && data.authorName.size() <= 80
+        && data.authorLocation is string && data.authorLocation.size() >= 2 && data.authorLocation.size() <= 80
+        && data.itemName is string && data.itemName.size() >= 2 && data.itemName.size() <= 120
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.comment is string && data.comment.size() >= 10 && data.comment.size() <= 1000
+        && data.createdBy is string && data.createdBy.size() >= 1 && data.createdBy.size() <= 128
+        && data.createdBy.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // 4. Collection Rules: /items/{itemId} (Public Catalog Read, Admin Write)
+    match /items/{itemId} {
+      allow get: if isValidId(itemId);
+      allow list: if true;
+
+      allow create: if isSignedIn()
+        && isValidId(itemId)
+        && isValidFurnitureItem(incoming())
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+
+      allow update: if isSignedIn()
+        && isValidId(itemId)
+        && isValidFurnitureItem(incoming())
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: UpdateSaleStatus
+          (incoming().diff(existing()).affectedKeys().hasOnly(['isOnSale', 'salePrice', 'saleLabel', 'updatedAt']) && isAdmin()) ||
+          // Action: UpdateItemDetails
+          (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'price', 'category', 'imageUrl', 'dimensions', 'material', 'isOnSale', 'salePrice', 'saleLabel', 'updatedAt']) && isAdmin())
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(itemId)
+        && isAdmin();
+    }
+
+    // 5. Collection Rules: /categories/{categoryId} (Public Catalog Read, Admin Write)
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+
+      allow create: if isSignedIn()
+        && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+
+      allow update: if isSignedIn()
+        && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: UpdateCategoryDetails
+          (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'slug', 'description', 'updatedAt']) && isAdmin())
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(categoryId)
+        && isAdmin();
+    }
+
+    // 6. Collection Rules: /admins/{adminId} (PII Isolated)
+    match /admins/{adminId} {
+      allow get: if isSignedIn()
+        && isValidId(adminId)
+        && (request.auth.uid == adminId || isAdmin());
+
+      allow list: if isVerifiedUser()
+        && (
+          resource.data.addedBy == request.auth.uid ||
+          resource.data.uid == request.auth.uid ||
+          isBootstrapAdmin()
+        );
+
+      allow create: if isSignedIn()
+        && isValidId(adminId)
+        && isValidAdminGrant(incoming())
+        && incoming().uid == adminId
+        && incoming().addedBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+
+      allow update: if isSignedIn()
+        && isValidId(adminId)
+        && isValidAdminGrant(incoming())
+        && incoming().uid == existing().uid
+        && incoming().addedBy == existing().addedBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: UpdateAdminEmail
+          (incoming().diff(existing()).affectedKeys().hasOnly(['email', 'updatedAt']) && isAdmin())
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(adminId)
+        && isAdmin();
+    }
+
+    // 7. Collection Rules: /reviews/{reviewId} (Public Read, Verified User Create)
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId);
+      allow list: if true;
+
+      allow create: if isSignedIn()
+        && isValidId(reviewId)
+        && isValidCustomerReview(incoming())
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isVerifiedUser();
+
+      allow update: if isSignedIn()
+        && isValidId(reviewId)
+        && isValidCustomerReview(incoming())
+        && incoming().createdBy == existing().createdBy
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: AuthorEditReview
+          (isVerifiedUser() && existing().createdBy == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'comment', 'itemName', 'authorLocation', 'updatedAt'])) ||
+          // Action: AdminModerateReview
+          (incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'comment', 'itemName', 'authorLocation', 'updatedAt']) && isAdmin())
+        );
+
+      allow delete: if isSignedIn()
+        && isValidId(reviewId)
+        && ((isVerifiedUser() && existing().createdBy == request.auth.uid) || isAdmin());
+    }
+  }
+}

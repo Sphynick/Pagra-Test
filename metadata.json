@@ -1,0 +1,6 @@
+{
+  "name": "PAGRA Furniture",
+  "description": "PAGRA - ONE STOP FURNITURE SHOP. Architectural sofa and furniture storefront with admin management, WhatsApp ordering, and M-Pesa checkout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

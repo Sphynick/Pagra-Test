@@ -1,0 +1,282 @@
+{
+  "entities": {
+    "FurnitureItem": {
+      "title": "FurnitureItem",
+      "description": "A sofa or furniture product listed in the PAGRA showroom catalog.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Display name of the furniture piece"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 2000,
+          "description": "Detailed architectural and material description"
+        },
+        "price": {
+          "type": "number",
+          "description": "Regular retail price in KES"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Furniture category name"
+        },
+        "imageUrl": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 600000,
+          "description": "Image path, URL, or compressed data URI for the item"
+        },
+        "dimensions": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Physical dimensions of the furniture piece"
+        },
+        "material": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Primary upholstery and frame materials"
+        },
+        "isOnSale": {
+          "type": "boolean",
+          "description": "Whether the item is currently marked on promotional sale"
+        },
+        "salePrice": {
+          "type": "number",
+          "description": "Promotional sale price in KES when on sale"
+        },
+        "saleLabel": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 60,
+          "description": "Optional promotional label for sale items"
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the administrator who created the item"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when item was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when item was last updated"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "price",
+        "category",
+        "imageUrl",
+        "dimensions",
+        "material",
+        "isOnSale",
+        "salePrice",
+        "saleLabel",
+        "createdBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A furniture category used for filtering and organizing PAGRA products.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Display title of the furniture category"
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "URL-safe identifier for the category"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 300,
+          "description": "Short editorial summary of the category"
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the administrator who created the category"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when category was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when category was last updated"
+        }
+      },
+      "required": [
+        "name",
+        "slug",
+        "description",
+        "createdBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminGrant": {
+      "title": "AdminGrant",
+      "description": "An access control record granting administrator privileges to a user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Target administrator UID or deterministic identifier"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 5,
+          "maxLength": 254,
+          "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+          "description": "Authorized administrator email address"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"],
+          "minLength": 5,
+          "maxLength": 5,
+          "description": "Fixed RBAC role designation"
+        },
+        "addedBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the administrator who granted privileges"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when admin privilege was granted"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when admin privilege was last updated"
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "role",
+        "addedBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CustomerReview": {
+      "title": "CustomerReview",
+      "description": "A public customer review and rating for a PAGRA furniture item.",
+      "type": "object",
+      "properties": {
+        "authorName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Public display name of the reviewer"
+        },
+        "authorLocation": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "City or neighbourhood of the reviewer (e.g. Karen, Nairobi)"
+        },
+        "itemName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Name of the PAGRA furniture piece reviewed"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Star rating from 1 to 5"
+        },
+        "comment": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 1000,
+          "description": "Customer testimonial and experience details"
+        },
+        "createdBy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the authenticated user who submitted the review"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when review was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when review was last updated"
+        }
+      },
+      "required": [
+        "authorName",
+        "authorLocation",
+        "itemName",
+        "rating",
+        "comment",
+        "createdBy",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/items/{itemId}": {
+      "schema": { "$ref": "#/entities/FurnitureItem" },
+      "description": "Publicly readable catalog of PAGRA furniture items; write operations restricted strictly to verified administrators."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Publicly readable list of furniture categories; write operations restricted strictly to verified administrators."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminGrant" },
+      "description": "PII-isolated administrator role grants; read/write restricted strictly to the record owner or verified administrators."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/CustomerReview" },
+      "description": "Publicly readable customer reviews; creation restricted to verified authenticated users; deletion restricted to review author or administrators."
+    }
+  }
+}
