@@ -240,7 +240,7 @@ export default function App() {
             description: String(d.description || ''),
             price: Number(d.price || 0),
             category: String(d.category || 'Sofas'),
-            imageUrl: String(d.imageUrl || ''),
+            imageUrl: String(d.imageUrl || '').replace('/src/assets/images/', '/images/'),
             dimensions: String(d.dimensions || '230cm × 95cm × 78cm'),
             material: String(d.material || 'Belgian Linen & Hardwood'),
             isOnSale: Boolean(d.isOnSale),
